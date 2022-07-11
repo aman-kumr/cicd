@@ -63,12 +63,19 @@ jobs:
       - name: Build with Maven
         working-directory: ${{ env.applicationfolder }}
         run: mvn -B package -DskipTests --file pom.xml
-      #Build the application using Maven
+      #Print env variables
+      - name: Show default environment variables
+        run: |
+          echo "The job_id is: $GITHUB_JOB"   # reference the default environment variables
+          echo "The id of this action is: $GITHUB_ACTION"   # reference the default environment variables
+          echo "The run id is: $GITHUB_RUN_ID"
+          echo "The run number is: $GITHUB_RUN_NUMBER"
+      #Upload Jar
       - name: Upload JAR
         #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
         uses: actions/upload-artifact@v2
         with:
           #Set artifact name
-          name: artifact-${{ env.GITHUB_RUN_NUMBER }}.jar
+          name: artifact-$env.GITHUB_RUN_ID.jar
           #From this path
           path: ${{ env.applicationfolder }}/target/SpringBootHelloWorldExampleApplication-*.jar
