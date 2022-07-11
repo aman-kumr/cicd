@@ -69,6 +69,6 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           #Set artifact name
-          name: artifact
+          name: artifact-${{ env.GITHUB_RUN_NUMBER }}.jar
           #From this path
-          path: ${{ env.applicationfolder }}/target/SpringBootHelloWorldExampleApplication-1.jar
+          path: ${{ env.applicationfolder }}/target/SpringBootHelloWorldExampleApplication-*.jar
