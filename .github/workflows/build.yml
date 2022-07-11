@@ -71,4 +71,4 @@ jobs:
           #Set artifact name
           name: artifact
           #From this path
-          path: target/data-${{env.GITHUB_RUN_NUMBER}}.jar
+          path: target/data-0.0.1-SNAPSHOT.jar
