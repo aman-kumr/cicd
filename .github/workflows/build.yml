@@ -64,8 +64,9 @@ jobs:
         working-directory: ${{ env.applicationfolder }}
         run: mvn -B package -DskipTests --file pom.xml
       - name: Log data
-        run: mv ${{ env.applicationfolder }}/target/SpringBootHelloWorldExampleApplication-*.jar ${{ env.applicationfolder }}/target/SpringBootHelloWorldExampleApplication-${{ github.run_number }}.jar
-        run: ls -lrt
+        run: |
+          mv ${{ env.applicationfolder }}/target/SpringBootHelloWorldExampleApplication-*.jar ${{ env.applicationfolder }}/target/SpringBootHelloWorldExampleApplication-${{ github.run_number }}.jar
+          ls -lrt
       #Upload Jar
       - name: Upload JAR
         #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
@@ -77,9 +78,8 @@ jobs:
           path: ${{ env.applicationfolder }}/target/SpringBootHelloWorldExampleApplication-*.jar
       - name: Upload Artifact to s3
         uses: shallwefootball/s3-upload-action@master
-        working-directory: ${{ env.applicationfolder }}/target
         with:
           aws_key_id: ${{ secrets.AWS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
           aws_bucket: ${{ secrets.AWS_BUCKET }}
-          source_dir: SpringBootHelloWorldExampleApplication-${{ github.run_number }}.jar
+          source_dir: ${{ env.applicationfolder }}/target/SpringBootHelloWorldExampleApplication-${{ github.run_number }}.jar
