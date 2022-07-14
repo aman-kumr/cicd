@@ -80,5 +80,5 @@ jobs:
           #From this path
           path: ${{ env.applicationfolder }}/target/SpringBootHelloWorldExampleApplication-*.jar
       - name: Upload to S3
-        run: AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp ./$ARTIFACT_NAME s3://${{AWS_BUCKET}}/$ARTIFACT_NAME
+        run: AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp ./$ARTIFACT_NAME s3://${{secrets.AWS_BUCKET}}/$ARTIFACT_NAME
         working-directory: ${{ env.applicationfolder }}/target
