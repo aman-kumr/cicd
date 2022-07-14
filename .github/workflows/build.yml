@@ -63,10 +63,13 @@ jobs:
       - name: Build with Maven
         working-directory: ${{ env.applicationfolder }}
         run: mvn -B package -DskipTests --file pom.xml
-      - name: Log data
+      - name: Set build file name
         run: |
           mv ${{ env.applicationfolder }}/target/SpringBootHelloWorldExampleApplication-*.jar ${{ env.applicationfolder }}/target/SpringBootHelloWorldExampleApplication-${{ github.run_number }}.jar
-          ls -lrt
+          ls -lrt ${{ env.applicationfolder }}/target
+          echo "ARTIFACT_NAME=SpringBootHelloWorldExampleApplication-${{ github.run_number }}.jar" >> $GITHUB_ENV
+      - name: Test
+      run: echo $ARTIFACT_NAME
       #Upload Jar
       - name: Upload JAR
         #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
@@ -76,10 +79,6 @@ jobs:
           name: artifact-${{ github.run_number }}.jar
           #From this path
           path: ${{ env.applicationfolder }}/target/SpringBootHelloWorldExampleApplication-*.jar
-      - name: Upload Artifact to s3
-        uses: shallwefootball/s3-upload-action@master
-        with:
-          aws_key_id: ${{ secrets.AWS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
-          aws_bucket: ${{ secrets.AWS_BUCKET }}
-          source_dir: ${{ env.applicationfolder }}/target
+      - name: Upload to S3
+        run: AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp ./$ARTIFACT_NAME s3://${{AWS_BUCKET}}/$ARTIFACT_NAME
+        working-directory: ${{ env.applicationfolder }}/target
