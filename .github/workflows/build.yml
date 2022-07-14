@@ -79,6 +79,14 @@ jobs:
           name: artifact-${{ github.run_number }}.jar
           #From this path
           path: ${{ env.applicationfolder }}/target/SpringBootHelloWorldExampleApplication-*.jar
-      - name: Upload to S3
-        run: AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp ./$ARTIFACT_NAME s3://${{secrets.AWS_BUCKET}}/$ARTIFACT_NAME
+  #Upload's job
+  upload:
+    needs: build
+    name: Upload
+     #Run on Ubuntu using the latest version
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - name: Upload JAR
         working-directory: ${{ env.applicationfolder }}/target
+        run: AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp ./$ARTIFACT_NAME s3://${{secrets.AWS_BUCKET}}/$ARTIFACT_NAME
