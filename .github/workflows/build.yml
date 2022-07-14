@@ -9,6 +9,7 @@ on:
       - main
 env:
   applicationfolder: spring-boot-hello-world-example
+  artifactname: artifact-${{ github.run_number }}.jar
 jobs:
   #Test's job
   tests:
@@ -63,20 +64,13 @@ jobs:
       - name: Build with Maven
         working-directory: ${{ env.applicationfolder }}
         run: mvn -B package -DskipTests --file pom.xml
-      - name: Set build file name
-        run: |
-          mv ${{ env.applicationfolder }}/target/SpringBootHelloWorldExampleApplication-*.jar ${{ env.applicationfolder }}/target/SpringBootHelloWorldExampleApplication-${{ github.run_number }}.jar
-          ls -lrt ${{ env.applicationfolder }}/target
-          echo "ARTIFACT_NAME=SpringBootHelloWorldExampleApplication-${{ github.run_number }}.jar" >> $GITHUB_ENV
-      - name: Test
-        run: echo $ARTIFACT_NAME
       #Upload Jar
       - name: Upload JAR
         #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
         uses: actions/upload-artifact@v2
         with:
           #Set artifact name
-          name: artifact-${{ github.run_number }}.jar
+          name: ${{ env.artifactname }}
           #From this path
           path: ${{ env.applicationfolder }}/target/SpringBootHelloWorldExampleApplication-*.jar
   #Upload's job
@@ -87,6 +81,13 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
+      - uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.artifactname }}
+      - name: Set build file name
+        run: |
+          ls -lrt 
+          echo $GITHUB_ENV
       - name: Upload JAR
-        working-directory: ${{ env.applicationfolder }}/target
-        run: AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp ./$ARTIFACT_NAME s3://${{secrets.AWS_BUCKET}}/$ARTIFACT_NAME
+        working-directory: ${{ env.applicationfolder }}
+        run: AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp ./${{ env.artifactname }} s3://${{secrets.AWS_BUCKET}}/${{ env.artifactname }}
