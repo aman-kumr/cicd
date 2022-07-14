@@ -69,7 +69,7 @@ jobs:
           ls -lrt ${{ env.applicationfolder }}/target
           echo "ARTIFACT_NAME=SpringBootHelloWorldExampleApplication-${{ github.run_number }}.jar" >> $GITHUB_ENV
       - name: Test
-      run: echo $ARTIFACT_NAME
+        run: echo $ARTIFACT_NAME
       #Upload Jar
       - name: Upload JAR
         #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
