@@ -86,8 +86,7 @@ jobs:
           name: ${{ env.artifactname }}
       - name: Set build file name
         run: |
-          ls -lrt 
-          echo $GITHUB_ENV
+          ls -lrt
       - name: Upload JAR
         working-directory: ${{ env.applicationfolder }}
         run: AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp ./${{ env.artifactname }} s3://${{secrets.AWS_BUCKET}}/${{ env.artifactname }}
