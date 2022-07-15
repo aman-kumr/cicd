@@ -66,5 +66,5 @@ jobs:
         run: mvn -B package -DskipTests --file pom.xml
       #Upload Jar
       - name: Upload to S3
-        working-directory: ${{ env.applicationfolder }}
+        working-directory: ${{ env.applicationfolder }}/target
         run: AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --region us-east-1 ./SpringBootHelloWorldExampleApplication-1.jar s3://${{secrets.AWS_BUCKET}}/SpringBootHelloWorldExampleApplication-1.jar
