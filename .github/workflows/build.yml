@@ -90,4 +90,4 @@ jobs:
           pwd
       - name: Upload JAR
         working-directory: ${{ env.applicationfolder }}
-        run: AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp ./${{ env.artifactname }} s3://${{secrets.AWS_BUCKET}}/${{ env.artifactname }}
+        run: AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp ./SpringBootHelloWorldExampleApplication-1.jar s3://${{secrets.AWS_BUCKET}}/SpringBootHelloWorldExampleApplication-1.jar
