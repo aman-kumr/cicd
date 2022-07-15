@@ -65,29 +65,6 @@ jobs:
         working-directory: ${{ env.applicationfolder }}
         run: mvn -B package -DskipTests --file pom.xml
       #Upload Jar
-      - name: Upload JAR
-        #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
-        uses: actions/upload-artifact@v2
-        with:
-          #Set artifact name
-          name: ${{ env.artifactname }}
-          #From this path
-          path: ${{ env.applicationfolder }}/target/SpringBootHelloWorldExampleApplication-*.jar
-  #Upload's job
-  upload:
-    needs: build
-    name: Upload
-     #Run on Ubuntu using the latest version
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions/download-artifact@v3
-        with:
-          name: ${{ env.artifactname }}
-      - name: Log data
-        run: |
-          ls -lrt
-          pwd
-      - name: Upload JAR
+      - name: Upload to S3
         working-directory: ${{ env.applicationfolder }}
         run: AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --region us-east-1 ./SpringBootHelloWorldExampleApplication-1.jar s3://${{secrets.AWS_BUCKET}}/SpringBootHelloWorldExampleApplication-1.jar
