@@ -10,6 +10,7 @@ on:
 env:
   applicationfolder: spring-boot-hello-world-example
   artifactname: artifact-${{ github.run_number }}.jar
+  AWS_REGION: us-east-1
 jobs:
   #Test's job
   tests:
@@ -65,10 +66,35 @@ jobs:
         working-directory: ${{ env.applicationfolder }}
         run: mvn -B package -DskipTests --file pom.xml
       #Prepare the artifact
-      - name: Prepare artifact
-        run: |
-          cp spring-boot-hello-world-example/target/*.jar .
-          zip ${{ env.artifactname }} ./*.jar appspec.yml
+      #- name: Prepare artifact
+      #  run: |
+      #    cp spring-boot-hello-world-example/target/*.jar .
+      #    zip ${{ env.artifactname }} ./*.jar appspec.yml
       #Upload Jar
       - name: Upload to S3
-        run: AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --region us-east-1 ./${{ env.artifactname }} s3://${{secrets.AWS_BUCKET}}/${{ env.artifactname }}
+            run: AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --region ${{ env.AWS_REGION }} ./${{ env.artifactname }} s3://${{secrets.AWS_BUCKET}}/${{ env.artifactname }}
+  #Deploy Job
+  deploy:
+    needs: build
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Deploy in EC2
+        env:
+            PRIVATE_KEY: ${{ secrets.SSH_PRIVATE  }}
+            HOSTNAME : ${{ secrets.EC2_ADDRESS  }}
+            USER_NAME : ${{ secrets.SSH_USERNAME  }}
+
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          scp -i private_key ${{ env.artifactname }} ${USER_NAME}@${HOSTNAME}:/tmp
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
+
+            #Now we have got the access of EC2 and we will start the deploy .
+            app_process=$(jps | grep artifact | awk '{print $1}')
+            if [ -z "$app_process" ]; then
+                kill -9 $app_process
+            fi
+            mv /tmp/${{ env.artifactname }} ~
+            nohup java -jar ${{ env.artifactname }} &
