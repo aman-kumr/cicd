@@ -89,14 +89,14 @@ jobs:
 
       run: |
         echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-        ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
+        ssh -o StrictHostKeyChecking=no -i private_key ${{env.USER_NAME}}@$${{env.HOSTNAME}}
         aws s3 cp --region ${{ env.AWS_REGION }} s3://${{secrets.AWS_BUCKET}}/${{ env.archivename }} ~/stage/
         unzip ~/stage/${{ env.archivename }}
 
-        #Now we have got the access of EC2 and we will start the deploy .
-        app_process=$(jps | grep artifact | awk '{print $1}')
-        if [ -z "$app_process" ]; then
-            kill -9 $app_process
-        fi
-        mv ~/stage/${{ env.artifactname }} ~
-        nohup java -jar ${{ env.artifactname }} &
+          #Now we have got the access of EC2 and we will start the deploy .
+          app_process=$(jps | grep artifact | awk '{print $1}')
+          if [ -z "$app_process" ]; then
+              kill -9 $app_process
+          fi
+          mv ~/stage/${{ env.artifactname }} ~
+          nohup java -jar ${{ env.artifactname }} &
