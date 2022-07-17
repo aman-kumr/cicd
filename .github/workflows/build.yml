@@ -70,7 +70,7 @@ jobs:
       - name: Prepare artifact
         run: |
           cp spring-boot-hello-world-example/target/*.jar ./${{ env.artifactname }}
-      #    zip ${{ env.archivename }} ./*.jar appspec.yml
+          zip ${{ env.archivename }} ./*.jar
       #Upload Jar
       - name: Upload to S3
         run: AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --region ${{ env.AWS_REGION }} ./${{ env.artifactname }} s3://${{secrets.AWS_BUCKET}}/${{ env.archivename }}
@@ -89,13 +89,14 @@ jobs:
 
       run: |
         echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-        scp -o StrictHostKeyChecking=no -i private_key ./${{ env.artifactname }} ${USER_NAME}@${HOSTNAME}:/tmp
         ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
+        aws s3 cp --region ${{ env.AWS_REGION }} s3://${{secrets.AWS_BUCKET}}/${{ env.archivename }} ~/stage/
+        unzip ~/stage/${{ env.archivename }}
 
-          #Now we have got the access of EC2 and we will start the deploy .
-          app_process=$(jps | grep artifact | awk '{print $1}')
-          if [ -z "$app_process" ]; then
-              kill -9 $app_process
-          fi
-          mv /tmp/${{ env.artifactname }} ~
-          nohup java -jar ${{ env.artifactname }} &
+        #Now we have got the access of EC2 and we will start the deploy .
+        app_process=$(jps | grep artifact | awk '{print $1}')
+        if [ -z "$app_process" ]; then
+            kill -9 $app_process
+        fi
+        mv ~/stage/${{ env.artifactname }} ~
+        nohup java -jar ${{ env.artifactname }} &
