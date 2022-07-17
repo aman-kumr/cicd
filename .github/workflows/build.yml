@@ -64,7 +64,11 @@ jobs:
       - name: Build with Maven
         working-directory: ${{ env.applicationfolder }}
         run: mvn -B package -DskipTests --file pom.xml
+      #Prepare the artifact
+      - name: Prepare artifact
+        run: |
+          cp spring-boot-hello-world-example/target/*.jar .
+          zip ${{ env.artifactname }} ./*.jar appspec.yml
       #Upload Jar
       - name: Upload to S3
-        working-directory: ${{ env.applicationfolder }}/target
-        run: AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --region us-east-1 ./SpringBootHelloWorldExampleApplication-1.jar s3://${{secrets.AWS_BUCKET}}/SpringBootHelloWorldExampleApplication-1.jar
+        run: AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --region us-east-1 ./${{ env.artifactname }} s3://${{secrets.AWS_BUCKET}}/${{ env.artifactname }}
