@@ -72,7 +72,6 @@ jobs:
       - name: Prepare artifact
         run: |
           cp spring-boot-hello-world-example/target/*.jar ./${{ env.artifactname }}
-          cp zip -r ${{ env.archivename }} ./*.jar appspec.yml aws/*
           mkdir archive
           cp -r ./*.jar appspec.yml aws/* archive
       - name: Configure AWS credentials
