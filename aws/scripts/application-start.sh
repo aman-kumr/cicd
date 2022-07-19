@@ -3,4 +3,4 @@ set -xe
 
 # Start the application server.
 ls
-java -jar artifact*.jar
+java -jar /usr/local/codedeployresources/artifact*.jar
