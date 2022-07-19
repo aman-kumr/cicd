@@ -12,8 +12,8 @@ env:
   artifactname: artifact-${{ github.run_number }}.jar
   archivename: artifact-${{ github.run_number }}.zip
   AWS_REGION: us-east-1
-  appname:
-  deploy-group:
+  appname: GitDeployApp
+  deploy-group: GitDeployGroup
 jobs:
   #Test's job
   tests:
@@ -72,7 +72,9 @@ jobs:
       - name: Prepare artifact
         run: |
           cp spring-boot-hello-world-example/target/*.jar ./${{ env.artifactname }}
-          zip -r ${{ env.archivename }} ./*.jar appspec.yml aws/*
+          cp zip -r ${{ env.archivename }} ./*.jar appspec.yml aws/*
+          mkdir archive
+          cp -r ./*.jar appspec.yml aws/* archive
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -80,17 +82,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
       #Upload Jar
-      - name: Upload to S3
-        run: aws s3 cp --region ${{ env.AWS_REGION }} ./${{ env.artifactname }} s3://${{secrets.AWS_BUCKET}}/${{ env.archivename }}
+      # - name: Upload to S3
+      #   run: aws s3 cp --region ${{ env.AWS_REGION }} ./${{ env.artifactname }} s3://${{secrets.AWS_BUCKET}}/${{ env.archivename }}
       # Deploy push to AWS S3
-      # - name: AWS Deploy push
-      #   run: |
-      #     aws deploy push \
-      #     --application-name ${{ env.appname }} \
-      #     --description "This is a revision for the ${{ env.appname }}-${{ github.sha }}" \
-      #     --ignore-hidden-files \
-      #     --s3-location s3://${{ secrets.AWS_BUCKET }}/${{ env.archivename }} \
-      #     --source .
+      - name: AWS Deploy push
+        run: |
+          aws deploy push \
+          --application-name ${{ env.appname }} \
+          --description "This is a revision for the ${{ env.appname }}-${{ github.sha }}" \
+          --ignore-hidden-files \
+          --s3-location s3://${{ secrets.AWS_BUCKET }}/${{ env.archivename }} \
+          --source ./archive
       # # Create deployment to CodeDeploy
       # - name: AWS Create Deployment
       #   run: |
