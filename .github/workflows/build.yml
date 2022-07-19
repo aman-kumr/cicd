@@ -12,6 +12,8 @@ env:
   artifactname: artifact-${{ github.run_number }}.jar
   archivename: artifact-${{ github.run_number }}.zip
   AWS_REGION: us-east-1
+  appname:
+  deploy-group:
 jobs:
   #Test's job
   tests:
@@ -70,33 +72,31 @@ jobs:
       - name: Prepare artifact
         run: |
           cp spring-boot-hello-world-example/target/*.jar ./${{ env.artifactname }}
-          zip ${{ env.archivename }} ./*.jar
+          zip -r ${{ env.archivename }} ./*.jar appspec.yml aws/*
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
       #Upload Jar
       - name: Upload to S3
-        run: AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --region ${{ env.AWS_REGION }} ./${{ env.artifactname }} s3://${{secrets.AWS_BUCKET}}/${{ env.archivename }}
-  #Deploy Job
-  deploy:
-    needs: build
-    name: Deploy
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Deploy in EC2
-      env:
-          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE  }}
-          HOSTNAME : ${{ secrets.EC2_ADDRESS  }}
-          USER_NAME : ${{ secrets.SSH_USERNAME  }}
-
-      run: |
-        echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-        ssh -o StrictHostKeyChecking=no -i private_key ${{env.USER_NAME}}@$${{env.HOSTNAME}}
-        aws s3 cp --region ${{ env.AWS_REGION }} s3://${{secrets.AWS_BUCKET}}/${{ env.archivename }} ~/stage/
-        unzip ~/stage/${{ env.archivename }}
-
-          #Now we have got the access of EC2 and we will start the deploy .
-          app_process=$(jps | grep artifact | awk '{print $1}')
-          if [ -z "$app_process" ]; then
-              kill -9 $app_process
-          fi
-          mv ~/stage/${{ env.artifactname }} ~
-          nohup java -jar ${{ env.artifactname }} &
+        run: aws s3 cp --region ${{ env.AWS_REGION }} ./${{ env.artifactname }} s3://${{secrets.AWS_BUCKET}}/${{ env.archivename }}
+      # Deploy push to AWS S3
+      # - name: AWS Deploy push
+      #   run: |
+      #     aws deploy push \
+      #     --application-name ${{ env.appname }} \
+      #     --description "This is a revision for the ${{ env.appname }}-${{ github.sha }}" \
+      #     --ignore-hidden-files \
+      #     --s3-location s3://${{ secrets.AWS_BUCKET }}/${{ env.archivename }} \
+      #     --source .
+      # # Create deployment to CodeDeploy
+      # - name: AWS Create Deployment
+      #   run: |
+      #     aws deploy create-deployment \
+      #      --application-name ${{ env.appname }} \
+      #      --deployment-config-name CodeDeployDefault.OneAtATime \
+      #      --deployment-group-name ${{ env.deploy-group }} \
+      #      --file-exists-behavior OVERWRITE \
+      #      --s3-location bucket=${{ secrets.AWS_BUCKET }},key=${{ env.archivename }},bundleType=zip \
