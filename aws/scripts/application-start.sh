@@ -1,6 +1,6 @@
 #!/bin/bash
 set -xe
 
-# Start Tomcat, the application server.
-cd '/home/ubuntu/app'
+# Start the application server.
+ls
 java -jar artifact*.jar

@@ -93,11 +93,12 @@ jobs:
           --s3-location s3://${{ secrets.AWS_BUCKET }}/${{ env.archivename }} \
           --source ./archive
       # # Create deployment to CodeDeploy
-      # - name: AWS Create Deployment
-      #   run: |
-      #     aws deploy create-deployment \
-      #      --application-name ${{ env.appname }} \
-      #      --deployment-config-name CodeDeployDefault.OneAtATime \
-      #      --deployment-group-name ${{ env.deploy-group }} \
-      #      --file-exists-behavior OVERWRITE \
-      #      --s3-location bucket=${{ secrets.AWS_BUCKET }},key=${{ env.archivename }},bundleType=zip \
+      - name: AWS Create Deployment
+        run: |
+          aws deploy create-deployment \
+           --application-name ${{ env.appname }} \
+           --deployment-config-name CodeDeployDefault.AllAtOnce \
+           --deployment-group-name ${{ env.deploy-group }} \
+           --file-exists-behavior OVERWRITE \
+           --s3-location bucket=${{ secrets.AWS_BUCKET }},key=${{ env.archivename }},bundleType=zip \
+           --description "Deployment for ${{ env.appname }}-${{ github.sha }}"
