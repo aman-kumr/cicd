@@ -2,4 +2,4 @@
 set -xe
 
 # Start the application server.
-nohup java -jar /usr/local/codedeployresources/artifact*.jar &
+nohup java -jar /home/ubuntu/app/artifact*.jar &
