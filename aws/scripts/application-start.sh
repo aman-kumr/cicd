@@ -2,4 +2,5 @@
 set -xe
 
 # Start Tomcat, the application server.
-service tomcat start
+cd '/home/ubuntu/app'
+java -jar artifact*.jar
