@@ -8,7 +8,7 @@ on:
     branches:
       - main
     paths:
-      - '!**/uat-deploy.yml'
+      - '!.github/workflows/deploy-to-uat.yml'
 env:
   applicationfolder: spring-boot-hello-world-example
   artifactname: artifact-${{ github.run_number }}.jar
